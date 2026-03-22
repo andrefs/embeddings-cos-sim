@@ -28,7 +28,8 @@
     "we-cos-sim": "./dist/bin/we-cos-sim.js",
     "we-cos-sim-download": "./dist/bin/download-model.js",
     "we-cos-sim-level": "./dist/bin/model-to-level.js",
-    "we-cos-sim-verify": "./dist/bin/verify-level-db.js"
+    "we-cos-sim-verify": "./dist/bin/verify-level-db.js",
+    "we-cos-sim-embeddings": "./dist/bin/embeddings.js"
   },
   "files": [
     "dist"

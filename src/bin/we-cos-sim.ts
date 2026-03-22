@@ -1,27 +1,47 @@
 import { buildCosSimFn, loadVec } from "../lib/cosSim";
-import type { Level } from 'level';
+import { getEmbeddingConfig } from "../lib/utils";
 
-if (process.argv.length < 5) {
-  console.error('Usage: we-cos-sim <lang> <word1> <word2>');
-  process.exit(1);
-}
+function parseArgs(): { embeddingName: string; word1: string; word2: string } {
+  const args = process.argv.slice(2);
+  if (args.length < 3) {
+    console.error('Usage: we-cos-sim <embedding> <word1> <word2> OR we-cos-sim --embedding <name> <word1> <word2>');
+    process.exit(1);
+  }
 
-const lang = process.argv[2];
-const word1 = process.argv[3];
-const word2 = process.argv[4];
+  let embeddingName: string;
+  let word1: string;
+  let word2: string;
 
-loadVec(lang!)
-  .then(async (db: Level<string, Buffer>) => buildCosSimFn(db))
-  .then(async (cosSim) => {
-    if (!lang || !word1 || !word2) {
-      console.error('Usage: we-cos-sim <lang> <word1> <word2>');
+  if (args[0] === '--embedding' || args[0] === '-e') {
+    if (args.length < 4) {
+      console.error('Usage: we-cos-sim --embedding <name> <word1> <word2>');
       process.exit(1);
     }
-    return cosSim(word1, word2);
-  })
-  .then((result: number | null) => console.log(result))
-  .catch((err: Error) => console.error(err));
+    embeddingName = args[1]!;
+    word1 = args[2]!;
+    word2 = args[3]!;
+  } else {
+    embeddingName = args[0]!;
+    word1 = args[1]!;
+    word2 = args[2]!;
+  }
 
+  return { embeddingName, word1, word2 };
+}
 
+const { embeddingName, word1, word2 } = parseArgs();
 
+async function run() {
+  const config = await getEmbeddingConfig(embeddingName);
+  if (!config) {
+    console.error(`Embedding '${embeddingName}' not found.`);
+    process.exit(1);
+  } else {
+    const db = await loadVec(config.levelPath);
+    const cosSim = await buildCosSimFn(db);
+    const result = await cosSim(word1, word2);
+    console.log(result);
+  }
+}
 
+run().catch(err => console.error(err));

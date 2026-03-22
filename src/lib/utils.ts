@@ -11,6 +11,18 @@ const modelsFolder = 'fasttext-vecs';
 export const DEFAULT_WECOSSIM_PATH = path.join(process.env.HOME!, '.we-cos-sim');
 export const DEFAULT_LEVEL_PATH = path.join(DEFAULT_WECOSSIM_PATH, levelFolder);
 
+// Embedding configuration types
+export interface EmbeddingConfig {
+  name: string;
+  description: string;
+  levelPath: string;
+  modelPath?: string;
+  url?: string;
+  dimension?: number;
+}
+
+export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_WECOSSIM_PATH, 'embeddings.json');
+
 function makeFolders(rootFolder: string) {
   if (!oldFs.existsSync(rootFolder)) {
     oldFs.mkdirSync(rootFolder);
@@ -23,13 +35,41 @@ function makeFolders(rootFolder: string) {
   }
 }
 
-export async function downloadModel(lang: string, rootFolder = DEFAULT_WECOSSIM_PATH) {
-  const url = `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${lang}.300.vec.gz`;
-  makeFolders(rootFolder);
-  const levelFile = path.join(rootFolder, levelFolder, `cc.${lang}.300.vec.lvl`);
-  const modelFile = path.join(rootFolder, modelsFolder, `cc.${lang}.300.vec.gz`);
+export async function downloadModel(langOrConfig: string | EmbeddingConfig, rootFolder = DEFAULT_WECOSSIM_PATH) {
+  let config: EmbeddingConfig;
+  if (typeof langOrConfig === 'string') {
+    const lang = langOrConfig;
+    config = {
+      name: lang,
+      description: `FastText vectors for ${lang}`,
+      modelPath: path.join(rootFolder, modelsFolder, `cc.${lang}.300.vec.gz`),
+      levelPath: path.join(rootFolder, levelFolder, `cc.${lang}.300.vec.lvl`),
+      url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${lang}.300.vec.gz`,
+      dimension: 300
+    };
+  } else {
+    config = langOrConfig;
+  }
 
-  console.log(`Downloading model for ${lang} from ${url}`);
+  if (!config.url) {
+    throw new Error(`No download URL specified for embedding '${config.name}'.`);
+  }
+  if (!config.modelPath) {
+    throw new Error(`No model path specified for embedding '${config.name}'.`);
+  }
+
+  const url = config.url;
+  const modelFile = path.isAbsolute(config.modelPath) ? config.modelPath : path.join(rootFolder, config.modelPath);
+  const levelFile = path.isAbsolute(config.levelPath) ? config.levelPath : path.join(rootFolder, config.levelPath);
+
+  makeFolders(rootFolder);
+  // Ensure model directory exists
+  const modelDir = path.dirname(modelFile);
+  if (!oldFs.existsSync(modelDir)) {
+    oldFs.mkdirSync(modelDir, { recursive: true });
+  }
+
+  console.log(`Downloading model for ${config.name} from ${url}`);
   console.log(`This might take a while...`);
   const response = await fetch(url);
   if (!response.ok) {
@@ -42,7 +82,7 @@ export async function downloadModel(lang: string, rootFolder = DEFAULT_WECOSSIM_
   const nodeStream = Readable.fromWeb(response.body as any);
   const teeStream = new PassThrough();
   const fileWriteStream = oldFs.createWriteStream(modelFile);
-  console.log(`Writing level file to ${modelFile}`);
+  console.log(`Writing model file to ${modelFile}`);
   const downloadStream = pipeline(nodeStream, teeStream, fileWriteStream).catch(console.error);
 
   const db = new Level<string, Buffer>(levelFile, { valueEncoding: 'buffer' });
@@ -142,4 +182,62 @@ export async function verifyLevelDb(levelPath: string, sampleWords?: string[]) {
   finally {
     await db.close();
   }
+}
+
+// User configuration management
+export async function loadUserConfig(): Promise<Record<string, EmbeddingConfig>> {
+  try {
+    if (!oldFs.existsSync(EMBEDDING_CONFIG_FILE)) {
+      return {};
+    }
+    const data = await oldFs.promises.readFile(EMBEDDING_CONFIG_FILE, 'utf-8');
+    return JSON.parse(data) as Record<string, EmbeddingConfig>;
+  } catch (err) {
+    console.error('Failed to load embeddings config:', err);
+    return {};
+  }
+}
+
+export async function saveUserConfig(config: Record<string, EmbeddingConfig>): Promise<void> {
+  await oldFs.promises.mkdir(path.dirname(EMBEDDING_CONFIG_FILE), { recursive: true });
+  await oldFs.promises.writeFile(EMBEDDING_CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+}
+
+export async function addEmbeddingToUserConfig(embedding: EmbeddingConfig): Promise<void> {
+  const config = await loadUserConfig();
+  config[embedding.name] = embedding;
+  await saveUserConfig(config);
+}
+
+export async function removeEmbeddingFromUserConfig(name: string): Promise<void> {
+  const config = await loadUserConfig();
+  delete config[name];
+  await saveUserConfig(config);
+}
+
+export async function listEmbeddings(): Promise<EmbeddingConfig[]> {
+  const config = await loadUserConfig();
+  return Object.values(config);
+}
+
+export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_WECOSSIM_PATH): Promise<EmbeddingConfig | null> {
+  // Check user config first
+  const userConfig = await loadUserConfig();
+  if (userConfig[name]) {
+    return userConfig[name];
+  }
+
+  // If not found and name matches FastText language code pattern (2-3 lowercase letters)
+  if (/^[a-z]{2,3}$/.test(name)) {
+    return {
+      name,
+      description: `FastText vectors for ${name}`,
+      modelPath: path.join(rootFolder, modelsFolder, `cc.${name}.300.vec.gz`),
+      levelPath: path.join(rootFolder, levelFolder, `cc.${name}.300.vec.lvl`),
+      url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${name}.300.vec.gz`,
+      dimension: 300
+    };
+  }
+
+  return null;
 }
