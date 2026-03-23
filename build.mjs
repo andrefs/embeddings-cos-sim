@@ -23,11 +23,11 @@ await esbuild.build({
 
 // Copy and build bin files
 const bins = [
-  { src: 'src/bin/index.ts', out: 'embeddings-cos-sim.js' },
-  { src: 'src/bin/download-model.ts', out: 'embeddings-cos-sim-download.js' },
-  { src: 'src/bin/model-to-level.ts', out: 'embeddings-cos-sim-level.js' },
-  { src: 'src/bin/verify-level-db.ts', out: 'embeddings-cos-sim-verify.js' },
-  { src: 'src/bin/embeddings.ts', out: 'embeddings-cos-sim-embeddings.js' },
+  { src: 'src/bin/index.ts', out: 'embeddings-cos-sim.js', banner: true },
+  { src: 'src/bin/download-model.ts', out: 'embeddings-cos-sim-download.js', banner: true },
+  { src: 'src/bin/model-to-level.ts', out: 'embeddings-cos-sim-level.js', banner: true },
+  { src: 'src/bin/verify-level-db.ts', out: 'embeddings-cos-sim-verify.js', banner: true },
+  { src: 'src/bin/embeddings.ts', out: 'embeddings-cos-sim-embeddings.js', banner: true },
 ];
 for (const bin of bins) {
   await esbuild.build({
@@ -38,9 +38,7 @@ for (const bin of bins) {
     outfile: `dist/bin/${bin.out}`,
     sourcemap: true,
     packages: 'external',
-    banner: {
-      js: '#!/usr/bin/env node',
-    },
+    ...(bin.banner ? { banner: { js: '#!/usr/bin/env node' } } : {}),
   });
 }
 
