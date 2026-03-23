@@ -1,194 +1,194 @@
 # we-cos-sim
 
-we-cos-sim is a tool for calculating the cosine similarity between words (or nodes) using embeddings. It supports FastText word vectors as well as custom embeddings like Node2Vec and RDF2Vec.
+A versatile tool for calculating cosine similarity using embeddings. Supports word embeddings (FastText) and graph-based node embeddings (Node2Vec, RDF2Vec), or any custom embeddings in the standard text vector format.
 
 ## Features
 
-- Download pre-trained FastText word vectors for different languages.
-- Convert embedding models to LevelDB format for efficient querying.
-- Calculate cosine similarity between words/nodes.
-- Manage multiple embedding types with named configurations.
+- Pre-configured embeddings: FastText word vectors, DBpedia Node2Vec, DBpedia RDF2Vec
+- Support for custom embeddings via simple configuration
+- Convert embedding files to LevelDB for fast lookups
+- Calculate cosine similarity between any two keys (words or nodes)
+- Unified interface for all embedding types
 
 ## Installation
 
-To install the necessary dependencies, run:
-
 ```bash
 npm install
-```
-
-To build the project and generate the `dist` directory:
-
-```bash
 npm run build
 ```
 
-To install the global binaries (after building), you can run:
+For global CLI access:
 
 ```bash
 npm install -g .
 ```
 
-## Managing Embeddings
+## Built-in Embeddings
 
-### Listing Registered Embeddings
+The following embeddings are pre-configured out of the box:
 
-```bash
-we-cos-sim-embeddings list
-```
-
-### Adding a Custom Embedding
-
-Register a new embedding by providing a name and the path to its LevelDB:
-
-```bash
-we-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]
-```
-
-- `<name>`: A unique identifier for the embedding (e.g., `node2vec-dbpedia`).
-- `<levelPath>`: Path to the LevelDB directory containing the vectors.
-- `--model`: (optional) Path to the source vector file (for re-conversion).
-- `--url`: (optional) URL to download the source file.
-- `--desc`: (optional) Human-readable description.
-
-Example:
-
-```bash
-we-cos-sim-embeddings add node2vec-dbpedia ~/.we-cos-sim/level/node2vec.lvl --model ~/.we-cos-sim/vectors_dbpedia_Node2Vec.txt.gz
-```
-
-### Removing an Embedding
-
-```bash
-we-cos-sim-embeddings remove <name>
-```
+| Name | Type | Description |
+|------|------|-------------|
+| `fasttext-en`, `fasttext-de`, `fasttext-fr`, `fasttext-es` | Word | FastText Common Crawl vectors (300d) |
+| `node2vec-dbpedia` | Node | DBpedia embeddings via Node2Vec (300d) |
+| `rdf2vec-dbpedia` | Node | DBpedia embeddings via RDF2Vec (300d) |
 
 ## CLI Usage
 
-### Downloading a Model
-
-To download a FastText model, use the following command:
+### Calculate Similarity
 
 ```bash
-ts-node src/bin/download-model.ts <embeddingName>
-```
-
-For FastText, use `fasttext-en` for English, `fasttext-de` for German, etc.:
-
-```bash
-we-cos-sim-download fasttext-en
-```
-
-### Converting Model to LevelDB
-
-Convert a downloaded model to LevelDB format:
-
-```bash
-we-cos-sim-level <modelPath> <levelPath> [-v|--verbose|-p|--progress]
-```
-
-Or using an embedding configuration:
-
-```bash
-we-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
-```
-
-- `<modelPath>`: Path to the `.vec.gz` or `.vec` file.
-- `<levelPath>`: Path where the LevelDB should be stored.
-- `--embedding <name>`: Use a registered embedding config instead of specifying paths.
-
-### Calculating Cosine Similarity
-
-To calculate the cosine similarity between two words/nodes:
-
-```bash
-we-cos-sim <embeddingName> <word1> <word2>
+we-cos-sim <embeddingName> <key1> <key2>
 ```
 
 Or with an explicit flag:
 
 ```bash
-we-cos-sim --embedding <name> <word1> <word2>
+we-cos-sim --embedding <name> <key1> <key2>
 ```
 
-- `<embeddingName>`: The embedding identifier (e.g., `fasttext-en`, `node2vec-dbpedia`, `rdf2vec-dbpedia`).
-- `<word1>` and `<word2>`: The words (or node identifiers) to compare.
-
-For node embeddings like DBpedia resources, include the full URI:
+**Examples:**
 
 ```bash
-we-cos-sim --embedding node2vec-dbpedia "http://dbpedia.org/resource/Damir_Šovšić__4" "http://dbpedia.org/resource/Émile_Amélineau"
+# FastText word similarity
+we-cos-sim fasttext-en king queen
+
+# Node similarity (full URIs as keys)
+we-cos-sim node2vec-dbpedia "http://dbpedia.org/resource/Paris" "http://dbpedia.org/resource/France"
 ```
 
-### Verifying a LevelDB
-
-Check the contents of a LevelDB:
+### Download a Model
 
 ```bash
-we-cos-sim-verify <levelPath> [word1] [word2] ...
+we-cos-sim-download <embeddingName>
 ```
 
-Or using an embedding:
+This downloads the source file and converts it to LevelDB in one step.
+
+**Example:**
 
 ```bash
-we-cos-sim-verify --embedding <name> [word1] [word2] ...
+we-cos-sim-download fasttext-en
+```
+
+### Convert Model to LevelDB
+
+```bash
+we-cos-sim-level <sourceFilePath> <targetLevelDbPath> [-v|--verbose|-p|--progress]
+```
+
+Or use a pre-configured embedding:
+
+```bash
+we-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
+```
+
+**Examples:**
+
+```bash
+# With explicit paths
+we-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.we-cos-sim/level/node2vec.lvl -p
+
+# With a predefined embedding
+we-cos-sim-level --embedding node2vec-dbpedia -p
+```
+
+### Verify a LevelDB
+
+```bash
+we-cos-sim-verify <levelPath> [key1] [key2] ...
+```
+
+Or using a registered embedding:
+
+```bash
+we-cos-sim-verify --embedding <name> [key1] [key2] ...
+```
+
+### Manage Custom Embeddings
+
+List all registered embeddings:
+
+```bash
+we-cos-sim-embeddings list
+```
+
+Add a custom embedding:
+
+```bash
+we-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]
+```
+
+Remove a custom embedding:
+
+```bash
+we-cos-sim-embeddings remove <name>
+```
+
+**Example:**
+
+```bash
+we-cos-sim-embeddings add my-custom-emb ~/.we-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
 ```
 
 ## Usage as a Library
 
-First, load a vector model into a LevelDB instance:
-
 ```typescript
-import { loadVec } from "we-cos-sim/lib/cosSim";
+import { loadVec, buildCosSimFn } from "we-cos-sim/lib/cosSim";
 import { getEmbeddingConfig } from "we-cos-sim/lib/utils";
 
-async function loadModel(embeddingName: string) {
-  const config = await getEmbeddingConfig(embeddingName);
-  if (!config) {
-    throw new Error(`Embedding not found: ${embeddingName}`);
-  }
+async function example() {
+  // Get config for a pre-defined embedding
+  const config = await getEmbeddingConfig("fasttext-en");
+  
+  // Load the LevelDB
   const db = await loadVec(config.levelPath);
-  return db;
-}
-```
-
-Then calculate cosine similarity:
-
-```typescript
-import { buildCosSimFn } from "we-cos-sim/lib/cosSim";
-
-async function calculateSimilarity(db, word1: string, word2: string) {
+  
+  // Build a similarity function
   const cosSim = await buildCosSimFn(db);
-  const similarity = await cosSim(word1, word2);
-  console.log(`Cosine similarity between "${word1}" and "${word2}":`, similarity);
+  
+  // Compute similarity
+  const score = await cosSim("king", "queen");
+  console.log(`Similarity: ${score}`);
 }
 
-// Example
-loadModel('fasttext-en').then(db => calculateSimilarity(db, "hello", "world"));
+example();
 ```
 
-You can also create an embedding configuration programmatically:
+## File Format
 
-```typescript
-import { getEmbeddingConfig } from 'we-cos-sim/lib/utils';
+Embedding files should be in FastText `.vec` format:
+- Plain text (gzip-compressed or not)
+- Space-separated values
+- First token is the key (word or URI)
+- Remaining tokens are floating-point vector components
 
-const config = await getEmbeddingConfig('node2vec-dbpedia');
-// config.levelPath gives the LevelDB location, etc.
+Example:
 ```
+king 0.345 0.123 -0.456 ...(300 dimensions total)
+queen 0.312 0.156 -0.389 ...
+http://dbpedia.org/resource/Paris 0.234 -0.567 ...
+```
+
+## Paths
+
+By default, configs and data are stored under `~/.we-cos-sim/`:
+
+- `level/` - LevelDB databases
+- `fasttext-vecs/` - downloaded FastText models
+- `embeddings.json` - custom embedding configurations
+
+Paths in embedding configs can be absolute or relative to `~/.we-cos-sim/`.
 
 ## Testing
-
-To run the tests:
 
 ```bash
 npm test
 ```
 
-The test suite includes unit tests for the cosine similarity function and a sample LevelDB.
-
 ## License
 
-This project is licensed under the ISC License.
+ISC
 
 ## Author
 
