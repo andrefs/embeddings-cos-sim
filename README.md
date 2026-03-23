@@ -1,5 +1,7 @@
 # embeddings-cos-sim
 
+> **Note:** This project is the continuation of the now-defunct [we-cos-sim](https://github.com/andrefs/we-cos-sim) project, which was limited to word embeddings. This version supports any embedding type including graph-based node embeddings.
+
 A versatile tool for calculating cosine similarity using embeddings. Supports word embeddings (FastText) and graph-based node embeddings (Node2Vec, RDF2Vec), or any custom embeddings in the standard text vector format.
 
 ## Features
