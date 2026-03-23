@@ -29,32 +29,32 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
   'fasttext-en': {
     name: 'fasttext-en',
     description: 'FastText English word embeddings (Common Crawl 300 dimensions)',
-    levelPath: 'level/cc.en.300.vec.lvl',
-    modelPath: 'vectors/cc.en.300.vec.gz',
+    levelPath: 'level/fasttext-en.lvl',
+    modelPath: 'vectors/fasttext-en.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.vec.gz',
     dimension: 300
   },
   'fasttext-de': {
     name: 'fasttext-de',
     description: 'FastText German word embeddings (Common Crawl 300 dimensions)',
-    levelPath: 'level/cc.de.300.vec.lvl',
-    modelPath: 'vectors/cc.de.300.vec.gz',
+    levelPath: 'level/fasttext-de.lvl',
+    modelPath: 'vectors/fasttext-de.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.vec.gz',
     dimension: 300
   },
   'fasttext-fr': {
     name: 'fasttext-fr',
     description: 'FastText French word embeddings (Common Crawl 300 dimensions)',
-    levelPath: 'level/cc.fr.300.vec.lvl',
-    modelPath: 'vectors/cc.fr.300.vec.gz',
+    levelPath: 'level/fasttext-fr.lvl',
+    modelPath: 'vectors/fasttext-fr.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fr.300.vec.gz',
     dimension: 300
   },
   'fasttext-es': {
     name: 'fasttext-es',
     description: 'FastText Spanish word embeddings (Common Crawl 300 dimensions)',
-    levelPath: 'level/cc.es.300.vec.lvl',
-    modelPath: 'vectors/cc.es.300.vec.gz',
+    levelPath: 'level/fasttext-es.lvl',
+    modelPath: 'vectors/fasttext-es.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.es.300.vec.gz',
     dimension: 300
   },
@@ -63,7 +63,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'node2vec-dbpedia',
     description: 'Node2Vec DBpedia embeddings from University of Mannheim',
     levelPath: 'level/node2vec-dbpedia.lvl',
-    modelPath: 'vectors/vectors_dbpedia_Node2Vec.txt.gz',
+    modelPath: 'vectors/node2vec-dbpedia.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_Node2Vec.txt',
     dimension: 300
   },
@@ -71,7 +71,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'rdf2vec-dbpedia',
     description: 'RDF2Vec DBpedia embeddings from University of Mannheim',
     levelPath: 'level/rdf2vec-dbpedia.lvl',
-    modelPath: 'vectors/vectors_dbpedia_rdf2vec.txt.gz',
+    modelPath: 'vectors/rdf2vec-dbpedia.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_rdf2vec.txt',
     dimension: 300
   },
