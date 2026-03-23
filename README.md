@@ -67,19 +67,17 @@ we-cos-sim-embeddings remove <name>
 
 ### Downloading a Model
 
-Download a FastText model for a specific language:
+To download a FastText model, use the following command:
 
 ```bash
-we-cos-sim-download <lang>
+ts-node src/bin/download-model.ts <embeddingName>
 ```
 
-Or using an embedding name:
+For FastText, use `fasttext-en` for English, `fasttext-de` for German, etc.:
 
 ```bash
-we-cos-sim-download --embedding <name>
+we-cos-sim-download fasttext-en
 ```
-
-Replace `<lang>` with the desired language code (e.g., `en` for English).
 
 ### Converting Model to LevelDB
 
@@ -104,7 +102,7 @@ we-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
 To calculate the cosine similarity between two words/nodes:
 
 ```bash
-we-cos-sim <embedding> <word1> <word2>
+we-cos-sim <embeddingName> <word1> <word2>
 ```
 
 Or with an explicit flag:
@@ -113,7 +111,7 @@ Or with an explicit flag:
 we-cos-sim --embedding <name> <word1> <word2>
 ```
 
-- `<embedding>`: Language code (for FastText) or a registered embedding name.
+- `<embeddingName>`: The embedding identifier (e.g., `fasttext-en`, `node2vec-dbpedia`, `rdf2vec-dbpedia`).
 - `<word1>` and `<word2>`: The words (or node identifiers) to compare.
 
 For node embeddings like DBpedia resources, include the full URI:
@@ -166,7 +164,7 @@ async function calculateSimilarity(db, word1: string, word2: string) {
 }
 
 // Example
-loadModel('en').then(db => calculateSimilarity(db, "hello", "world"));
+loadModel('fasttext-en').then(db => calculateSimilarity(db, "hello", "world"));
 ```
 
 You can also create an embedding configuration programmatically:

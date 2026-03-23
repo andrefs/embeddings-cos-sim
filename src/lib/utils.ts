@@ -23,8 +23,42 @@ export interface EmbeddingConfig {
 
 export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_WECOSSIM_PATH, 'embeddings.json');
 
-// Built-in predefined embeddings (non-FastText)
+// All built-in embeddings use the same structure - no special cases
 const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
+  // FastText embeddings (pre-configured with explicit names)
+  'fasttext-en': {
+    name: 'fasttext-en',
+    description: 'FastText English word embeddings (Common Crawl 300 dimensions)',
+    levelPath: 'level/cc.en.300.vec.lvl',
+    modelPath: 'fasttext-vecs/cc.en.300.vec.gz',
+    url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.vec.gz',
+    dimension: 300
+  },
+  'fasttext-de': {
+    name: 'fasttext-de',
+    description: 'FastText German word embeddings (Common Crawl 300 dimensions)',
+    levelPath: 'level/cc.de.300.vec.lvl',
+    modelPath: 'fasttext-vecs/cc.de.300.vec.gz',
+    url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.vec.gz',
+    dimension: 300
+  },
+  'fasttext-fr': {
+    name: 'fasttext-fr',
+    description: 'FastText French word embeddings (Common Crawl 300 dimensions)',
+    levelPath: 'level/cc.fr.300.vec.lvl',
+    modelPath: 'fasttext-vecs/cc.fr.300.vec.gz',
+    url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fr.300.vec.gz',
+    dimension: 300
+  },
+  'fasttext-es': {
+    name: 'fasttext-es',
+    description: 'FastText Spanish word embeddings (Common Crawl 300 dimensions)',
+    levelPath: 'level/cc.es.300.vec.lvl',
+    modelPath: 'fasttext-vecs/cc.es.300.vec.gz',
+    url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.es.300.vec.gz',
+    dimension: 300
+  },
+  // DBpedia node embeddings
   'node2vec-dbpedia': {
     name: 'node2vec-dbpedia',
     description: 'Node2Vec DBpedia embeddings from University of Mannheim',
@@ -42,17 +76,6 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     dimension: 300
   },
 };
-
-function getFastTextConfig(lang: string): EmbeddingConfig {
-  return {
-    name: lang,
-    description: `FastText vectors for ${lang}`,
-    modelPath: path.join('fasttext-vecs', `cc.${lang}.300.vec.gz`),
-    levelPath: path.join('level', `cc.${lang}.300.vec.lvl`),
-    url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${lang}.300.vec.gz`,
-    dimension: 300
-  };
-}
 
 function makeFolders(rootFolder: string) {
   if (!oldFs.existsSync(rootFolder)) {
@@ -251,7 +274,7 @@ export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_WECO
     return userConfig[name];
   }
 
-  // 2. Predefined non-FastText embeddings
+  // 2. Predefined embeddings (includes FastText and DBpedia)
   if (PREDEFINED_EMBEDDINGS[name]) {
     // Resolve relative paths against root folder
     const config = { ...PREDEFINED_EMBEDDINGS[name] };
@@ -262,11 +285,6 @@ export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_WECO
       config.levelPath = path.join(rootFolder, config.levelPath);
     }
     return config;
-  }
-
-  // 3. FastText language codes (2-3 lowercase letters)
-  if (/^[a-z]{2,3}$/.test(name)) {
-    return getFastTextConfig(name);
   }
 
   return null;
