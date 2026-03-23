@@ -23,6 +23,37 @@ export interface EmbeddingConfig {
 
 export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_WECOSSIM_PATH, 'embeddings.json');
 
+// Built-in predefined embeddings (non-FastText)
+const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
+  'node2vec-dbpedia': {
+    name: 'node2vec-dbpedia',
+    description: 'Node2Vec DBpedia embeddings from University of Mannheim',
+    levelPath: 'level/node2vec-dbpedia.lvl',
+    modelPath: 'vectors_dbpedia_Node2Vec.txt.gz',
+    url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_Node2Vec.txt',
+    dimension: 300
+  },
+  'rdf2vec-dbpedia': {
+    name: 'rdf2vec-dbpedia',
+    description: 'RDF2Vec DBpedia embeddings from University of Mannheim',
+    levelPath: 'level/rdf2vec-dbpedia.lvl',
+    modelPath: 'vectors_dbpedia_rdf2vec.txt.gz',
+    url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_rdf2vec.txt',
+    dimension: 300
+  },
+};
+
+function getFastTextConfig(lang: string): EmbeddingConfig {
+  return {
+    name: lang,
+    description: `FastText vectors for ${lang}`,
+    modelPath: path.join('fasttext-vecs', `cc.${lang}.300.vec.gz`),
+    levelPath: path.join('level', `cc.${lang}.300.vec.lvl`),
+    url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${lang}.300.vec.gz`,
+    dimension: 300
+  };
+}
+
 function makeFolders(rootFolder: string) {
   if (!oldFs.existsSync(rootFolder)) {
     oldFs.mkdirSync(rootFolder);
@@ -35,20 +66,13 @@ function makeFolders(rootFolder: string) {
   }
 }
 
-export async function downloadModel(langOrConfig: string | EmbeddingConfig, rootFolder = DEFAULT_WECOSSIM_PATH) {
-  let config: EmbeddingConfig;
-  if (typeof langOrConfig === 'string') {
-    const lang = langOrConfig;
-    config = {
-      name: lang,
-      description: `FastText vectors for ${lang}`,
-      modelPath: path.join(rootFolder, modelsFolder, `cc.${lang}.300.vec.gz`),
-      levelPath: path.join(rootFolder, levelFolder, `cc.${lang}.300.vec.lvl`),
-      url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${lang}.300.vec.gz`,
-      dimension: 300
-    };
-  } else {
-    config = langOrConfig;
+export async function downloadModel(embeddingOrConfig: string | EmbeddingConfig, rootFolder = DEFAULT_WECOSSIM_PATH) {
+  const config = typeof embeddingOrConfig === 'string'
+    ? await getEmbeddingConfig(embeddingOrConfig, rootFolder)
+    : embeddingOrConfig;
+
+  if (!config) {
+    throw new Error(`Embedding not found: ${embeddingOrConfig}`);
   }
 
   if (!config.url) {
@@ -221,23 +245,40 @@ export async function listEmbeddings(): Promise<EmbeddingConfig[]> {
 }
 
 export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_WECOSSIM_PATH): Promise<EmbeddingConfig | null> {
-  // Check user config first
+  // 1. User-defined configs (highest priority)
   const userConfig = await loadUserConfig();
   if (userConfig[name]) {
     return userConfig[name];
   }
 
-  // If not found and name matches FastText language code pattern (2-3 lowercase letters)
+  // 2. Predefined non-FastText embeddings
+  if (PREDEFINED_EMBEDDINGS[name]) {
+    // Resolve relative paths against root folder
+    const config = { ...PREDEFINED_EMBEDDINGS[name] };
+    if (config.modelPath && !path.isAbsolute(config.modelPath)) {
+      config.modelPath = path.join(rootFolder, config.modelPath);
+    }
+    if (!path.isAbsolute(config.levelPath)) {
+      config.levelPath = path.join(rootFolder, config.levelPath);
+    }
+    return config;
+  }
+
+  // 3. FastText language codes (2-3 lowercase letters)
   if (/^[a-z]{2,3}$/.test(name)) {
-    return {
-      name,
-      description: `FastText vectors for ${name}`,
-      modelPath: path.join(rootFolder, modelsFolder, `cc.${name}.300.vec.gz`),
-      levelPath: path.join(rootFolder, levelFolder, `cc.${name}.300.vec.lvl`),
-      url: `https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.${name}.300.vec.gz`,
-      dimension: 300
-    };
+    return getFastTextConfig(name);
   }
 
   return null;
+}
+
+/**
+ * Extract a human-readable name from an entity URI (e.g., DBpedia resources)
+ * @param uri - The full URI (e.g., "http://dbpedia.org/resource/Entity_Name")
+ * @returns The local name with underscores replaced by spaces
+ */
+export function extractEntityName(uri: string): string {
+  const parts = uri.split('/');
+  const lastPart = parts[parts.length - 1] || uri;
+  return decodeURIComponent(lastPart.replace(/_/g, ' '));
 }
