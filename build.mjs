@@ -22,15 +22,20 @@ await esbuild.build({
 });
 
 // Copy and build bin files
-const bins = ['src/bin/we-cos-sim.ts', 'src/bin/download-model.ts', 'src/bin/model-to-level.ts', 'src/bin/verify-level-db.ts', 'src/bin/embeddings.ts'];
+const bins = [
+  { src: 'src/bin/similarity.ts', out: 'embeddings-cos-sim.js' },
+  { src: 'src/bin/download-model.ts', out: 'embeddings-cos-sim-download.js' },
+  { src: 'src/bin/model-to-level.ts', out: 'embeddings-cos-sim-level.js' },
+  { src: 'src/bin/verify-level-db.ts', out: 'embeddings-cos-sim-verify.js' },
+  { src: 'src/bin/embeddings.ts', out: 'embeddings-cos-sim-embeddings.js' },
+];
 for (const bin of bins) {
-  const name = bin.split('/').pop()?.replace('.ts', '.js') ?? '';
   await esbuild.build({
-    entryPoints: [bin],
+    entryPoints: [bin.src],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist/bin',
+    outfile: `dist/bin/${bin.out}`,
     sourcemap: true,
     packages: 'external',
     banner: {

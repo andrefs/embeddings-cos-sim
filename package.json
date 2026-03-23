@@ -25,7 +25,7 @@
     }
   },
   "bin": {
-    "embeddings-cos-sim": "./dist/bin/we-cos-sim.js",
+    "embeddings-cos-sim": "./dist/bin/similarity.js",
     "embeddings-cos-sim-download": "./dist/bin/download-model.js",
     "embeddings-cos-sim-level": "./dist/bin/model-to-level.js",
     "embeddings-cos-sim-verify": "./dist/bin/verify-level-db.js",
