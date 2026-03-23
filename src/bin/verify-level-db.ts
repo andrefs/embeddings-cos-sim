@@ -7,21 +7,21 @@ function parseArgs() {
   let words: string[] = [];
 
   const embeddingIndex = args.findIndex(a => a === '--embedding' || a === '-e');
-  if (embeddingIndex >= 0) {
-    if (args.length <= embeddingIndex + 1) {
-      console.error('Usage: verify-level-db --embedding <name> [word1] [word2] ...');
-      process.exit(1);
-    }
-    embeddingName = args[embeddingIndex + 1] as string;
-    words = args.slice(embeddingIndex + 2) as string[];
-  } else {
-    if (args.length < 1) {
-      console.error('Usage: verify-level-db <levelPath> [word1] [word2] ...');
-      process.exit(1);
-    }
-    levelPath = args[0] as string;
-    words = args.slice(1) as string[];
-  }
+   if (embeddingIndex >= 0) {
+     if (args.length <= embeddingIndex + 1) {
+       console.error('Usage: embeddings-cos-sim-verify --embedding <name> [key1] [key2] ...');
+       process.exit(1);
+     }
+     embeddingName = args[embeddingIndex + 1] as string;
+     words = args.slice(embeddingIndex + 2) as string[];
+   } else {
+     if (args.length < 1) {
+       console.error('Usage: embeddings-cos-sim-verify <levelPath> [key1] [key2] ...');
+       process.exit(1);
+     }
+     levelPath = args[0] as string;
+     words = args.slice(1) as string[];
+   }
 
   return { embeddingName, levelPath, words };
 }

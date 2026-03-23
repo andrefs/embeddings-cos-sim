@@ -9,13 +9,13 @@ function parseArgs(): { embeddingName: string; hasFlag: boolean } {
   if (flagIndex >= 0) {
     hasFlag = true;
     if (args.length <= flagIndex + 1) {
-      console.error('Usage: download-model --embedding <name>');
+      console.error('Usage: embeddings-cos-sim-download --embedding <name>');
       process.exit(1);
     }
     embeddingName = args[flagIndex + 1] as string;
   } else {
     if (args.length < 1) {
-      console.error('Usage: download-model [--embedding <name>] OR download-model <lang>');
+      console.error('Usage: embeddings-cos-sim-download [--embedding <name>] OR embeddings-cos-sim-download <embeddingName>');
       process.exit(1);
     }
     embeddingName = args[0] as string;

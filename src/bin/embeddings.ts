@@ -4,7 +4,7 @@ import type { EmbeddingConfig } from '../lib/utils';
 async function main() {
   const args = process.argv.slice(2);
   if (args.length < 1) {
-    console.error('Usage: we-cos-sim-embeddings <list|add|remove> [options]');
+    console.error('Usage: embeddings-cos-sim-embeddings <list|add|remove> [options]');
     process.exit(1);
   }
 
@@ -27,11 +27,11 @@ async function main() {
       break;
     }
 
-    case 'add': {
-      if (args.length < 3) {
-        console.error('Usage: we-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]');
-        process.exit(1);
-      }
+     case 'add': {
+       if (args.length < 3) {
+         console.error('Usage: embeddings-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]');
+         process.exit(1);
+       }
       const name = args[1]!;
       const levelPath = args[2]!;
       const options = parseOptions(args.slice(3));
@@ -53,11 +53,11 @@ async function main() {
       break;
     }
 
-    case 'remove': {
-      if (args.length < 2) {
-        console.error('Usage: we-cos-sim-embeddings remove <name>');
-        process.exit(1);
-      }
+     case 'remove': {
+       if (args.length < 2) {
+         console.error('Usage: embeddings-cos-sim-embeddings remove <name>');
+         process.exit(1);
+       }
       const name = args[1]!;
       await removeEmbeddingFromUserConfig(name);
       console.log(`Removed embedding '${name}' (if it existed)`);

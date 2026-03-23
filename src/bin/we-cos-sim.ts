@@ -4,7 +4,7 @@ import { getEmbeddingConfig } from "../lib/utils";
 function parseArgs(): { embeddingName: string; word1: string; word2: string } {
   const args = process.argv.slice(2);
   if (args.length < 3) {
-    console.error('Usage: we-cos-sim <embedding> <word1> <word2> OR we-cos-sim --embedding <name> <word1> <word2>');
+    console.error('Usage: embeddings-cos-sim <embeddingName> <key1> <key2> OR embeddings-cos-sim --embedding <name> <key1> <key2>');
     process.exit(1);
   }
 
@@ -13,10 +13,10 @@ function parseArgs(): { embeddingName: string; word1: string; word2: string } {
   let word2: string;
 
   if (args[0] === '--embedding' || args[0] === '-e') {
-    if (args.length < 4) {
-      console.error('Usage: we-cos-sim --embedding <name> <word1> <word2>');
-      process.exit(1);
-    }
+     if (args.length < 4) {
+       console.error('Usage: embeddings-cos-sim --embedding <name> <key1> <key2>');
+       process.exit(1);
+     }
     embeddingName = args[1]!;
     word1 = args[2]!;
     word2 = args[3]!;

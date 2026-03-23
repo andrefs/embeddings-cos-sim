@@ -18,13 +18,13 @@ function parseArgs() {
   const embeddingIndex = args.findIndex(a => a === '--embedding' || a === '-e');
   if (embeddingIndex >= 0) {
     if (args.length <= embeddingIndex + 1) {
-      console.error('Usage: model-to-level --embedding <name> [-v|--verbose|-p|--progress]');
+      console.error('Usage: embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]');
       process.exit(1);
     }
     embeddingName = args[embeddingIndex + 1] as string;
   } else {
     if (args.length < 2) {
-      console.error('Usage: model-to-level <modelPath> <levelPath> [-v|--verbose|-p|--progress]');
+      console.error('Usage: embeddings-cos-sim-level <modelPath> <levelPath> [-v|--verbose|-p|--progress]');
       process.exit(1);
     }
     modelPath = args[0] as string;

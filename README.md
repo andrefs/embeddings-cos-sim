@@ -1,4 +1,4 @@
-# we-cos-sim
+# embeddings-cos-sim
 
 A versatile tool for calculating cosine similarity using embeddings. Supports word embeddings (FastText) and graph-based node embeddings (Node2Vec, RDF2Vec), or any custom embeddings in the standard text vector format.
 
@@ -38,29 +38,29 @@ The following embeddings are pre-configured out of the box:
 ### Calculate Similarity
 
 ```bash
-we-cos-sim <embeddingName> <key1> <key2>
+embeddings-cos-sim <embeddingName> <key1> <key2>
 ```
 
 Or with an explicit flag:
 
 ```bash
-we-cos-sim --embedding <name> <key1> <key2>
+embeddings-cos-sim --embedding <name> <key1> <key2>
 ```
 
 **Examples:**
 
 ```bash
 # FastText word similarity
-we-cos-sim fasttext-en king queen
+embeddings-cos-sim fasttext-en king queen
 
 # Node similarity (full URIs as keys)
-we-cos-sim node2vec-dbpedia "http://dbpedia.org/resource/Paris" "http://dbpedia.org/resource/France"
+embeddings-cos-sim node2vec-dbpedia "http://dbpedia.org/resource/Paris" "http://dbpedia.org/resource/France"
 ```
 
 ### Download a Model
 
 ```bash
-we-cos-sim-download <embeddingName>
+embeddings-cos-sim-download <embeddingName>
 ```
 
 This downloads the source file and converts it to LevelDB in one step.
@@ -68,41 +68,47 @@ This downloads the source file and converts it to LevelDB in one step.
 **Example:**
 
 ```bash
-we-cos-sim-download fasttext-en
+embeddings-cos-sim-download fasttext-en
 ```
 
 ### Convert Model to LevelDB
 
 ```bash
-we-cos-sim-level <sourceFilePath> <targetLevelDbPath> [-v|--verbose|-p|--progress]
+embeddings-cos-sim-level <sourceFilePath> <targetLevelDbPath> [-v|--verbose|-p|--progress]
+```
+
+Or using a pre-configured embedding:
+
+```bash
+embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
 ```
 
 Or use a pre-configured embedding:
 
 ```bash
-we-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
+embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
 ```
 
 **Examples:**
 
 ```bash
 # With explicit paths
-we-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.we-cos-sim/level/node2vec.lvl -p
+embeddings-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.we-cos-sim/level/node2vec.lvl -p
 
 # With a predefined embedding
-we-cos-sim-level --embedding node2vec-dbpedia -p
+embeddings-cos-sim-level --embedding node2vec-dbpedia -p
 ```
 
 ### Verify a LevelDB
 
 ```bash
-we-cos-sim-verify <levelPath> [key1] [key2] ...
+embeddings-cos-sim-verify <levelPath> [key1] [key2] ...
 ```
 
 Or using a registered embedding:
 
 ```bash
-we-cos-sim-verify --embedding <name> [key1] [key2] ...
+embeddings-cos-sim-verify --embedding <name> [key1] [key2] ...
 ```
 
 ### Manage Custom Embeddings
@@ -110,49 +116,32 @@ we-cos-sim-verify --embedding <name> [key1] [key2] ...
 List all registered embeddings:
 
 ```bash
-we-cos-sim-embeddings list
+embeddings-cos-sim-embeddings list
 ```
 
 Add a custom embedding:
 
 ```bash
-we-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]
+embeddings-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]
 ```
 
 Remove a custom embedding:
 
 ```bash
-we-cos-sim-embeddings remove <name>
+embeddings-cos-sim-embeddings remove <name>
 ```
 
 **Example:**
 
 ```bash
-we-cos-sim-embeddings add my-custom-emb ~/.we-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
+embeddings-cos-sim-embeddings add my-custom-emb ~/.we-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
 ```
 
 ## Usage as a Library
 
 ```typescript
-import { loadVec, buildCosSimFn } from "we-cos-sim/lib/cosSim";
-import { getEmbeddingConfig } from "we-cos-sim/lib/utils";
-
-async function example() {
-  // Get config for a pre-defined embedding
-  const config = await getEmbeddingConfig("fasttext-en");
-  
-  // Load the LevelDB
-  const db = await loadVec(config.levelPath);
-  
-  // Build a similarity function
-  const cosSim = await buildCosSimFn(db);
-  
-  // Compute similarity
-  const score = await cosSim("king", "queen");
-  console.log(`Similarity: ${score}`);
-}
-
-example();
+import { loadVec, buildCosSimFn } from "embeddings-cos-sim/lib/cosSim";
+import { getEmbeddingConfig } from "embeddings-cos-sim/lib/utils";
 ```
 
 ## File Format
