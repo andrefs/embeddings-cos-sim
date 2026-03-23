@@ -1,6 +1,6 @@
 {
   "name": "embeddings-cos-sim",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "description": "Calculate cosine similarity using embeddings (FastText, Node2Vec, RDF2Vec, custom)",
   "main": "./dist/index.js",
