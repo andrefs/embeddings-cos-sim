@@ -7,7 +7,7 @@ import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
 const levelFolder = 'level';
-const modelsFolder = 'fasttext-vecs';
+const vectorsFolder = 'vectors';
 export const DEFAULT_EMBEDDINGS_COS_SIM_PATH = path.join(process.env.HOME!, '.embeddings-cos-sim');
 export const DEFAULT_LEVEL_PATH = path.join(DEFAULT_EMBEDDINGS_COS_SIM_PATH, levelFolder);
 
@@ -30,7 +30,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'fasttext-en',
     description: 'FastText English word embeddings (Common Crawl 300 dimensions)',
     levelPath: 'level/cc.en.300.vec.lvl',
-    modelPath: 'fasttext-vecs/cc.en.300.vec.gz',
+    modelPath: 'vectors/cc.en.300.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.vec.gz',
     dimension: 300
   },
@@ -38,7 +38,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'fasttext-de',
     description: 'FastText German word embeddings (Common Crawl 300 dimensions)',
     levelPath: 'level/cc.de.300.vec.lvl',
-    modelPath: 'fasttext-vecs/cc.de.300.vec.gz',
+    modelPath: 'vectors/cc.de.300.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.vec.gz',
     dimension: 300
   },
@@ -46,7 +46,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'fasttext-fr',
     description: 'FastText French word embeddings (Common Crawl 300 dimensions)',
     levelPath: 'level/cc.fr.300.vec.lvl',
-    modelPath: 'fasttext-vecs/cc.fr.300.vec.gz',
+    modelPath: 'vectors/cc.fr.300.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fr.300.vec.gz',
     dimension: 300
   },
@@ -54,7 +54,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'fasttext-es',
     description: 'FastText Spanish word embeddings (Common Crawl 300 dimensions)',
     levelPath: 'level/cc.es.300.vec.lvl',
-    modelPath: 'fasttext-vecs/cc.es.300.vec.gz',
+    modelPath: 'vectors/cc.es.300.vec.gz',
     url: 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.es.300.vec.gz',
     dimension: 300
   },
@@ -63,7 +63,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'node2vec-dbpedia',
     description: 'Node2Vec DBpedia embeddings from University of Mannheim',
     levelPath: 'level/node2vec-dbpedia.lvl',
-    modelPath: 'vectors_dbpedia_Node2Vec.txt.gz',
+    modelPath: 'vectors/vectors_dbpedia_Node2Vec.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_Node2Vec.txt',
     dimension: 300
   },
@@ -71,7 +71,7 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     name: 'rdf2vec-dbpedia',
     description: 'RDF2Vec DBpedia embeddings from University of Mannheim',
     levelPath: 'level/rdf2vec-dbpedia.lvl',
-    modelPath: 'vectors_dbpedia_rdf2vec.txt.gz',
+    modelPath: 'vectors/vectors_dbpedia_rdf2vec.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_rdf2vec.txt',
     dimension: 300
   },
@@ -84,8 +84,8 @@ function makeFolders(rootFolder: string) {
   if (!oldFs.existsSync(path.join(rootFolder, levelFolder))) {
     oldFs.mkdirSync(path.join(rootFolder, levelFolder));
   }
-  if (!oldFs.existsSync(path.join(rootFolder, modelsFolder))) {
-    oldFs.mkdirSync(path.join(rootFolder, modelsFolder));
+  if (!oldFs.existsSync(path.join(rootFolder, vectorsFolder))) {
+    oldFs.mkdirSync(path.join(rootFolder, vectorsFolder));
   }
 }
 

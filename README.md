@@ -165,8 +165,8 @@ http://dbpedia.org/resource/Paris 0.234 -0.567 ...
 
 By default, configs and data are stored under `~/.embeddings-cos-sim/`:
 
+- `vectors/` - vector files (`.vec.gz` or `.txt.gz`)
 - `level/` - LevelDB databases
-- `fasttext-vecs/` - downloaded FastText models
 - `embeddings.json` - custom embedding configurations
 
 Paths in embedding configs can be absolute or relative to `~/.embeddings-cos-sim/`.
