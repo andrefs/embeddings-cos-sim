@@ -23,7 +23,7 @@ await esbuild.build({
 
 // Copy and build bin files
 const bins = [
-  { src: 'src/bin/similarity.ts', out: 'embeddings-cos-sim.js' },
+  { src: 'src/bin/index.ts', out: 'embeddings-cos-sim.js' },
   { src: 'src/bin/download-model.ts', out: 'embeddings-cos-sim-download.js' },
   { src: 'src/bin/model-to-level.ts', out: 'embeddings-cos-sim-level.js' },
   { src: 'src/bin/verify-level-db.ts', out: 'embeddings-cos-sim-verify.js' },

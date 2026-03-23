@@ -1,6 +1,6 @@
 {
   "name": "embeddings-cos-sim",
-  "version": "0.3.2",
+  "version": "1.0.0",
   "type": "module",
   "description": "Calculate cosine similarity using embeddings (FastText, Node2Vec, RDF2Vec, custom)",
   "main": "./dist/index.js",
@@ -25,11 +25,7 @@
     }
   },
    "bin": {
-     "embeddings-cos-sim": "./dist/bin/embeddings-cos-sim.js",
-     "embeddings-cos-sim-download": "./dist/bin/embeddings-cos-sim-download.js",
-     "embeddings-cos-sim-level": "./dist/bin/embeddings-cos-sim-level.js",
-     "embeddings-cos-sim-verify": "./dist/bin/embeddings-cos-sim-verify.js",
-     "embeddings-cos-sim-embeddings": "./dist/bin/embeddings-cos-sim-embeddings.js"
+     "embeddings-cos-sim": "./dist/bin/embeddings-cos-sim.js"
    },
   "files": [
     "dist"
@@ -55,6 +51,7 @@
   },
   "homepage": "https://github.com/andrefs/embeddings-cos-sim#readme",
   "dependencies": {
+    "commander": "^13.1.0",
     "level": "^9.0.0",
     "undici-types": "^6.20.0"
   },
