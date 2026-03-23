@@ -93,7 +93,7 @@ embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
 
 ```bash
 # With explicit paths
-embeddings-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.we-cos-sim/level/node2vec.lvl -p
+embeddings-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.embeddings-cos-sim/level/node2vec.lvl -p
 
 # With a predefined embedding
 embeddings-cos-sim-level --embedding node2vec-dbpedia -p
@@ -134,7 +134,7 @@ embeddings-cos-sim-embeddings remove <name>
 **Example:**
 
 ```bash
-embeddings-cos-sim-embeddings add my-custom-emb ~/.we-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
+embeddings-cos-sim-embeddings add my-custom-emb ~/.embeddings-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
 ```
 
 ## Usage as a Library
@@ -161,13 +161,13 @@ http://dbpedia.org/resource/Paris 0.234 -0.567 ...
 
 ## Paths
 
-By default, configs and data are stored under `~/.we-cos-sim/`:
+By default, configs and data are stored under `~/.embeddings-cos-sim/`:
 
 - `level/` - LevelDB databases
 - `fasttext-vecs/` - downloaded FastText models
 - `embeddings.json` - custom embedding configurations
 
-Paths in embedding configs can be absolute or relative to `~/.we-cos-sim/`.
+Paths in embedding configs can be absolute or relative to `~/.embeddings-cos-sim/`.
 
 ## Testing
 

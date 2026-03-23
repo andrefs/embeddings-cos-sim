@@ -8,8 +8,8 @@ import { pipeline } from 'node:stream/promises';
 
 const levelFolder = 'level';
 const modelsFolder = 'fasttext-vecs';
-export const DEFAULT_WECOSSIM_PATH = path.join(process.env.HOME!, '.we-cos-sim');
-export const DEFAULT_LEVEL_PATH = path.join(DEFAULT_WECOSSIM_PATH, levelFolder);
+export const DEFAULT_EMBEDDINGS_COS_SIM_PATH = path.join(process.env.HOME!, '.embeddings-cos-sim');
+export const DEFAULT_LEVEL_PATH = path.join(DEFAULT_EMBEDDINGS_COS_SIM_PATH, levelFolder);
 
 // Embedding configuration types
 export interface EmbeddingConfig {
@@ -21,7 +21,7 @@ export interface EmbeddingConfig {
   dimension?: number;
 }
 
-export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_WECOSSIM_PATH, 'embeddings.json');
+export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_EMBEDDINGS_COS_SIM_PATH, 'embeddings.json');
 
 // All built-in embeddings use the same structure - no special cases
 const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
@@ -89,7 +89,7 @@ function makeFolders(rootFolder: string) {
   }
 }
 
-export async function downloadModel(embeddingOrConfig: string | EmbeddingConfig, rootFolder = DEFAULT_WECOSSIM_PATH) {
+export async function downloadModel(embeddingOrConfig: string | EmbeddingConfig, rootFolder = DEFAULT_EMBEDDINGS_COS_SIM_PATH) {
   const config = typeof embeddingOrConfig === 'string'
     ? await getEmbeddingConfig(embeddingOrConfig, rootFolder)
     : embeddingOrConfig;
@@ -267,7 +267,7 @@ export async function listEmbeddings(): Promise<EmbeddingConfig[]> {
   return Object.values(config);
 }
 
-export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_WECOSSIM_PATH): Promise<EmbeddingConfig | null> {
+export async function getEmbeddingConfig(name: string, rootFolder = DEFAULT_EMBEDDINGS_COS_SIM_PATH): Promise<EmbeddingConfig | null> {
   // 1. User-defined configs (highest priority)
   const userConfig = await loadUserConfig();
   if (userConfig[name]) {
