@@ -24,18 +24,18 @@
       "default": "./dist/lib/utils.js"
     }
   },
-  "bin": {
-    "embeddings-cos-sim": "./dist/bin/similarity.js",
-    "embeddings-cos-sim-download": "./dist/bin/download-model.js",
-    "embeddings-cos-sim-level": "./dist/bin/model-to-level.js",
-    "embeddings-cos-sim-verify": "./dist/bin/verify-level-db.js",
-    "embeddings-cos-sim-embeddings": "./dist/bin/embeddings.js"
-  },
+   "bin": {
+     "embeddings-cos-sim": "./dist/bin/embeddings-cos-sim.js",
+     "embeddings-cos-sim-download": "./dist/bin/embeddings-cos-sim-download.js",
+     "embeddings-cos-sim-level": "./dist/bin/embeddings-cos-sim-level.js",
+     "embeddings-cos-sim-verify": "./dist/bin/embeddings-cos-sim-verify.js",
+     "embeddings-cos-sim-embeddings": "./dist/bin/embeddings-cos-sim-embeddings.js"
+   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "node build.mjs && npx tsc --emitDeclarationOnly",
+    "build": "node build.mjs && ./node_modules/.bin/tsc --emitDeclarationOnly",
     "test": "vitest",
     "prepare": "npm run build"
   },

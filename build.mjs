@@ -45,4 +45,4 @@ for (const bin of bins) {
 }
 
 // Copy declaration files from tsc (run tsc first for types)
-console.log('Build complete. Run `npx tsc --emitDeclarationOnly` for types.');
+console.log('Build complete. Run `./node_modules/.bin/tsc --emitDeclarationOnly` for types.');
