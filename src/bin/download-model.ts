@@ -1,11 +1,43 @@
-import { downloadModel } from '../lib/utils';
+import { downloadModel, getEmbeddingConfig } from '../lib/utils';
 
-if (process.argv.length < 3) {
-  console.error('Usage: download-model <lang>');
-  process.exit(1);
+function parseArgs(): { embeddingName: string; hasFlag: boolean } {
+  const args = process.argv.slice(2);
+  let embeddingName: string;
+  let hasFlag = false;
+
+  const flagIndex = args.findIndex(a => a === '--embedding' || a === '-e');
+  if (flagIndex >= 0) {
+    hasFlag = true;
+    if (args.length <= flagIndex + 1) {
+      console.error('Usage: embeddings-cos-sim-download --embedding <name>');
+      process.exit(1);
+    }
+    embeddingName = args[flagIndex + 1] as string;
+  } else {
+    if (args.length < 1) {
+      console.error('Usage: embeddings-cos-sim-download [--embedding <name>] OR embeddings-cos-sim-download <embeddingName>');
+      process.exit(1);
+    }
+    embeddingName = args[0] as string;
+  }
+
+  return { embeddingName, hasFlag };
 }
 
-const lang = process.argv[2];
-downloadModel(lang!)
-  .then(() => console.log('Done'))
-  .catch((err: Error) => console.error(err));
+const { embeddingName, hasFlag } = parseArgs();
+
+async function run() {
+  const config = await getEmbeddingConfig(embeddingName);
+  if (!config) {
+    console.error(`Embedding '${embeddingName}' not found.`);
+    process.exit(1);
+  }
+  if (!config.url) {
+    console.error(`Embedding '${embeddingName}' does not have a download URL.`);
+    process.exit(1);
+  }
+  await downloadModel(config);
+  console.log('Done');
+}
+
+run().catch(err => console.error(err));

@@ -1,14 +1,14 @@
 {
-  "name": "we-cos-sim",
-  "version": "0.3.0",
+  "name": "embeddings-cos-sim",
+  "version": "0.3.1",
   "type": "module",
-  "description": "Use word embeddings to calculate the cosine similarity of words",
+  "description": "Calculate cosine similarity using embeddings (FastText, Node2Vec, RDF2Vec, custom)",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andrefs/we-cos-sim.git"
+    "url": "git+https://github.com/andrefs/embeddings-cos-sim.git"
   },
   "exports": {
     ".": {
@@ -25,10 +25,11 @@
     }
   },
   "bin": {
-    "we-cos-sim": "./dist/bin/we-cos-sim.js",
-    "we-cos-sim-download": "./dist/bin/download-model.js",
-    "we-cos-sim-level": "./dist/bin/model-to-level.js",
-    "we-cos-sim-verify": "./dist/bin/verify-level-db.js"
+    "embeddings-cos-sim": "./dist/bin/similarity.js",
+    "embeddings-cos-sim-download": "./dist/bin/download-model.js",
+    "embeddings-cos-sim-level": "./dist/bin/model-to-level.js",
+    "embeddings-cos-sim-verify": "./dist/bin/verify-level-db.js",
+    "embeddings-cos-sim-embeddings": "./dist/bin/embeddings.js"
   },
   "files": [
     "dist"
@@ -40,16 +41,19 @@
   },
   "keywords": [
     "cosine",
-    "word",
+    "similarity",
     "embeddings",
-    "fasttext"
+    "fasttext",
+    "node2vec",
+    "rdf2vec",
+    "graph-embeddings"
   ],
   "author": "André Santos",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/andrefs/we-cos-sim/issues"
+    "url": "https://github.com/andrefs/embeddings-cos-sim/issues"
   },
-  "homepage": "https://github.com/andrefs/we-cos-sim#readme",
+  "homepage": "https://github.com/andrefs/embeddings-cos-sim#readme",
   "dependencies": {
     "level": "^9.0.0",
     "undici-types": "^6.20.0"

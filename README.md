@@ -1,95 +1,177 @@
-# we-cos-sim
+# embeddings-cos-sim
 
-we-cos-sim is a tool for calculating the cosine similarity between words using word embeddings. It leverages FastText vectors to provide semantic similarity scores.
+> **Note:** This project is the continuation of the now-defunct [we-cos-sim](https://github.com/andrefs/we-cos-sim) project, which was limited to word embeddings. This version supports any embedding type including graph-based node embeddings.
+
+A versatile tool for calculating cosine similarity using embeddings. Supports word embeddings (FastText) and graph-based node embeddings (Node2Vec, RDF2Vec), or any custom embeddings in the standard text vector format.
 
 ## Features
 
-- Download pre-trained FastText word vectors for different languages.
-- Convert word vector models to LevelDB format for efficient querying.
-- Calculate cosine similarity between words.
+- Pre-configured embeddings: FastText word vectors, DBpedia Node2Vec, DBpedia RDF2Vec
+- Support for custom embeddings via simple configuration
+- Convert embedding files to LevelDB for fast lookups
+- Calculate cosine similarity between any two keys (words or nodes)
+- Unified interface for all embedding types
 
 ## Installation
 
-To install the necessary dependencies, run:
-
 ```bash
 npm install
+npm run build
 ```
 
-## Usage in CLI
-
-### Downloading a Model
-
-To download a FastText model for a specific language, use the following command:
+For global CLI access:
 
 ```bash
-ts-node src/bin/download-model.ts <lang>
+npm install -g .
 ```
 
-Replace `<lang>` with the desired language code (e.g., `en` for English).
+## Built-in Embeddings
 
-### Converting Model to LevelDB
+The following embeddings are pre-configured out of the box:
 
-To convert a downloaded model to LevelDB format, use:
+| Name | Type | Description |
+|------|------|-------------|
+| `fasttext-en`, `fasttext-de`, `fasttext-fr`, `fasttext-es` | Word | FastText Common Crawl vectors (300d) |
+| `node2vec-dbpedia` | Node | DBpedia embeddings via Node2Vec (300d) |
+| `rdf2vec-dbpedia` | Node | DBpedia embeddings via RDF2Vec (300d) |
+
+## CLI Usage
+
+### Calculate Similarity
 
 ```bash
-ts-node src/bin/model-to-level.ts <modelPath> <levelPath>
+embeddings-cos-sim <embeddingName> <key1> <key2>
 ```
 
-- `<modelPath>`: Path to the downloaded `.vec.gz` file.
-- `<levelPath>`: Path where the LevelDB should be stored.
-
-### Calculating Cosine Similarity
-
-To calculate the cosine similarity between two words, use:
+Or with an explicit flag:
 
 ```bash
-ts-node src/bin/we-cos-sim.ts <lang> <word1> <word2>
+embeddings-cos-sim --embedding <name> <key1> <key2>
 ```
 
-- `<lang>`: Language code for the model.
-- `<word1>` and `<word2>`: The words to compare.
+**Examples:**
 
-## Usage as a library
+```bash
+# FastText word similarity
+embeddings-cos-sim fasttext-en king queen
 
-To use `we-cos-sim` as a library in your Node.js project, you can import the necessary functions and use them as follows:
+# Node similarity (full URIs as keys)
+embeddings-cos-sim node2vec-dbpedia "http://dbpedia.org/resource/Paris" "http://dbpedia.org/resource/France"
+```
 
-### Loading a Vector Model
+### Download a Model
 
-First, load a vector model into a LevelDB instance:
+```bash
+embeddings-cos-sim-download <embeddingName>
+```
+
+This downloads the source file and converts it to LevelDB in one step.
+
+**Example:**
+
+```bash
+embeddings-cos-sim-download fasttext-en
+```
+
+### Convert Model to LevelDB
+
+```bash
+embeddings-cos-sim-level <sourceFilePath> <targetLevelDbPath> [-v|--verbose|-p|--progress]
+```
+
+Or using a pre-configured embedding:
+
+```bash
+embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
+```
+
+Or use a pre-configured embedding:
+
+```bash
+embeddings-cos-sim-level --embedding <name> [-v|--verbose|-p|--progress]
+```
+
+**Examples:**
+
+```bash
+# With explicit paths
+embeddings-cos-sim-level vectors_dbpedia_Node2Vec.txt.gz ~/.embeddings-cos-sim/level/node2vec.lvl -p
+
+# With a predefined embedding
+embeddings-cos-sim-level --embedding node2vec-dbpedia -p
+```
+
+### Verify a LevelDB
+
+```bash
+embeddings-cos-sim-verify <levelPath> [key1] [key2] ...
+```
+
+Or using a registered embedding:
+
+```bash
+embeddings-cos-sim-verify --embedding <name> [key1] [key2] ...
+```
+
+### Manage Custom Embeddings
+
+List all registered embeddings:
+
+```bash
+embeddings-cos-sim-embeddings list
+```
+
+Add a custom embedding:
+
+```bash
+embeddings-cos-sim-embeddings add <name> <levelPath> [--model <modelPath>] [--url <url>] [--desc <description>]
+```
+
+Remove a custom embedding:
+
+```bash
+embeddings-cos-sim-embeddings remove <name>
+```
+
+**Example:**
+
+```bash
+embeddings-cos-sim-embeddings add my-custom-emb ~/.embeddings-cos-sim/level/myemb.lvl --model ~/downloads/myvectors.vec.gz --url "https://example.com/myvectors.vec.gz"
+```
+
+## Usage as a Library
 
 ```typescript
-import { loadVec } from "we-cos-sim/lib/cosSim";
-
-async function loadModel() {
-  const db = await loadVec("/path/to/leveldb");
-  return db;
-}
+import { loadVec, buildCosSimFn } from "embeddings-cos-sim/lib/cosSim";
+import { getEmbeddingConfig } from "embeddings-cos-sim/lib/utils";
 ```
 
-### Calculating Cosine Similarity
+## File Format
 
-Once the model is loaded, you can calculate the cosine similarity between two words:
+Embedding files should be in FastText `.vec` format:
+- Plain text (gzip-compressed or not)
+- Space-separated values
+- First token is the key (word or URI)
+- Remaining tokens are floating-point vector components
 
-```typescript
-import { buildCosSimFn } from "we-cos-sim/lib/cosSim";
-
-async function calculateSimilarity(db, word1, word2) {
-  const cosSim = await buildCosSimFn(db);
-  const similarity = await cosSim(word1, word2);
-  console.log(
-    `Cosine similarity between "${word1}" and "${word2}":`,
-    similarity,
-  );
-}
-
-// Usage
-loadModel().then((db) => calculateSimilarity(db, "word1", "word2"));
+Example:
+```
+king 0.345 0.123 -0.456 ...(300 dimensions total)
+queen 0.312 0.156 -0.389 ...
+http://dbpedia.org/resource/Paris 0.234 -0.567 ...
 ```
 
-This example demonstrates how to load a model and calculate the cosine similarity between two words using the `we-cos-sim` library.
+## Paths
 
-To run the tests, use:
+By default, configs and data are stored under `~/.embeddings-cos-sim/`:
+
+- `level/` - LevelDB databases
+- `fasttext-vecs/` - downloaded FastText models
+- `embeddings.json` - custom embedding configurations
+
+Paths in embedding configs can be absolute or relative to `~/.embeddings-cos-sim/`.
+
+## Testing
 
 ```bash
 npm test
@@ -97,7 +179,7 @@ npm test
 
 ## License
 
-This project is licensed under the ISC License.
+ISC
 
 ## Author
 
