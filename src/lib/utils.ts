@@ -77,6 +77,10 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
   },
 };
 
+export function getDownloadableEmbeddings(): EmbeddingConfig[] {
+  return Object.values(PREDEFINED_EMBEDDINGS).filter(e => e.url);
+}
+
 function makeFolders(rootFolder: string) {
   if (!oldFs.existsSync(rootFolder)) {
     oldFs.mkdirSync(rootFolder);

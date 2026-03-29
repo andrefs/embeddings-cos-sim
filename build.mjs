@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import { copyFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, readdirSync, statSync, chmodSync } from 'fs';
 import { join, extname } from 'path';
 
 // Clean dist
@@ -40,6 +40,7 @@ for (const bin of bins) {
     packages: 'external',
     ...(bin.banner ? { banner: { js: '#!/usr/bin/env node' } } : {}),
   });
+  chmodSync(`dist/bin/${bin.out}`, 0o755);
 }
 
 // Copy declaration files from tsc (run tsc first for types)
