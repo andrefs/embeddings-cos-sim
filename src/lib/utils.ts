@@ -3,7 +3,7 @@ import { Level } from 'level';
 import oldFs from 'node:fs';
 import { PassThrough, Readable } from 'node:stream';
 import { createInterface } from 'node:readline';
-import { createGunzip } from 'node:zlib';
+import { createGunzip, createGzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
 const levelFolder = 'level';
@@ -19,6 +19,7 @@ export interface EmbeddingConfig {
   modelPath?: string;
   url?: string;
   dimension?: number;
+  compress?: boolean;
 }
 
 export const EMBEDDING_CONFIG_FILE = path.join(DEFAULT_EMBEDDINGS_COS_SIM_PATH, 'embeddings.json');
@@ -65,7 +66,8 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     levelPath: 'level/node2vec-dbpedia.lvl',
     modelPath: 'vectors/node2vec-dbpedia.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_Node2Vec.txt',
-    dimension: 300
+    dimension: 300,
+    compress: true
   },
   'rdf2vec-dbpedia': {
     name: 'rdf2vec-dbpedia',
@@ -73,7 +75,8 @@ const PREDEFINED_EMBEDDINGS: Record<string, EmbeddingConfig> = {
     levelPath: 'level/rdf2vec-dbpedia.lvl',
     modelPath: 'vectors/rdf2vec-dbpedia.txt.gz',
     url: 'https://data.dws.informatik.uni-mannheim.de/KBE-for-Data-Mining/vectors_dbpedia_rdf2vec.txt',
-    dimension: 300
+    dimension: 300,
+    compress: true
   },
 };
 
@@ -132,11 +135,21 @@ export async function downloadModel(embeddingOrConfig: string | EmbeddingConfig,
 
   const nodeStream = Readable.fromWeb(response.body as any);
   const teeStream = new PassThrough();
+  const gzip = createGzip();
   const fileWriteStream = oldFs.createWriteStream(modelFile);
   console.log(`Writing model file to ${modelFile}`);
-  const downloadStream = pipeline(nodeStream, teeStream, fileWriteStream).catch(console.error);
 
   const db = new Level<string, Buffer>(levelFile, { valueEncoding: 'buffer' });
+
+  let downloadStream;
+  let parseStream;
+  if (config.compress) {
+    downloadStream = pipeline(nodeStream, teeStream, gzip, fileWriteStream).catch(console.error);
+    parseStream = parseVecFile(teeStream, db, false, false);
+  } else {
+    downloadStream = pipeline(nodeStream, teeStream, fileWriteStream).catch(console.error);
+    parseStream = parseVecFile(teeStream, db, false, true);
+  }
 
   // Interval to print progress
   const progressInterval = setInterval(() => {
@@ -147,7 +160,7 @@ export async function downloadModel(embeddingOrConfig: string | EmbeddingConfig,
     downloadedBytes += chunk.length;
   });
 
-  await parseVecFile(teeStream, db);
+  await parseStream;
 
   clearInterval(progressInterval);
   await downloadStream;
@@ -165,10 +178,14 @@ type LineParser = (line: string) => Promise<void> | void;
 export async function parseVecFile(
   input: NodeJS.ReadableStream,
   db: Level<string, Buffer>,
-  verbose: boolean | 'progress' = false
+  verbose: boolean | 'progress' = false,
+  compressed = true
 ) {
-  const gunzip = createGunzip();
-  const stream = input.pipe(gunzip);
+  let stream = input;
+  if (compressed) {
+    const gunzip = createGunzip();
+    stream = input.pipe(gunzip);
+  }
   const rl = createInterface({ input: stream });
 
   let count = 0;
@@ -199,8 +216,9 @@ export async function parseVecFile(
 export async function modelToLevel(modelPath: string, levelPath: string, { verbose = false }: { verbose?: boolean | 'progress' } = {}) {
   const db = new Level<string, Buffer>(levelPath, { valueEncoding: 'buffer' });
   const stream = oldFs.createReadStream(modelPath);
+  const compressed = modelPath.endsWith('.gz');
 
-  await parseVecFile(stream, db, verbose);
+  await parseVecFile(stream, db, verbose, compressed);
   await db.close();
 
   return db;
